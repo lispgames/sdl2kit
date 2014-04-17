@@ -19,7 +19,8 @@
     (loop for type in shaders by #'cddr
           for text in (cdr shaders) by #'cddr
           do (let ((shader (gl:create-shader type)))
-               (compile-and-check-shader shader text)
+               (when-let ((log (compile-and-check-shader shader text)))
+                 (format *error-output* "Compile Log for ~A:~%~A~%" type log))
                (push shader compiled-shaders)))
     (let ((program (gl:create-program)))
       (if (= 0 program)
@@ -33,7 +34,7 @@
             (gl:link-program program)
             (let ((log (gl:get-program-info-log program)))
               (unless (string= "" log)
-                (format *error-output* "~A~%" log)))
+                (format *error-output* "Link Log:~%~A~%" log)))
             (loop for shader in compiled-shaders
                   do (gl:detach-shader program shader)
                      (gl:delete-shader shader))))
