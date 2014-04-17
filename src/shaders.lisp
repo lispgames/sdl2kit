@@ -116,7 +116,7 @@ valid."
        (let ((,var (gethash ,name uniforms)))
          ,@body))))
 
-(declaim (notinline uniformi uniformf uniformfv uniform-matrix))
+(declaim (inline uniformi uniformf uniformfv uniform-matrix))
 (defun uniformi (dict name x &optional y z w)
   "Set the value for uniform with name `NAME` in the
 active program (set by sdk2.kit:use-program)."
