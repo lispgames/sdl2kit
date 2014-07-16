@@ -1,5 +1,6 @@
 (defpackage :sdl2.kit
   (:use #:cl #:alexandria)
+  (:nicknames #:kit.sdl2)
   (:export
 
    ;; general
@@ -15,6 +16,8 @@
 
    #:all-windows
 
+   #:window-size
+
    #:window-event
    #:keyboard-event
    #:mousemotion-event
@@ -23,14 +26,4 @@
    #:textinput-event
 
    #:render #:idle-render #:close-window
-   #:other-event
-
-   ;; shaders
-   #:compile-and-check-shader
-   #:compile-and-link-program
-   #:program #:shader-dictionary
-   #:find-program #:find-uniform
-   #:compile-shader-dictionary
-   #:use-program
-   #:uniformi #:uniformf #:uniformfv #:uniform-matrix
-   ))
+   #:other-event))

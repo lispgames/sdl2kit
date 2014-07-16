@@ -51,51 +51,5 @@ rendering.
 
 ## Shaders
 
-Often you want to compile and check shaders, maintain the programs,
-and set various uniforms as parameters.  `sdl2.kit` provides a way to
-do this simply:
-
-```lisp
-(defvar *my-programs*
-  `((:program-name
-     (:uniforms :v1 :v2 ...)
-     (:shaders :vertex-shader ,shader-text
-               :fragment-shader "..."
-               ...))
-
-    (:another-program ...)))
-```
-
-This is a simple structured list containing the specification for
-creating a dictionary.  You may specify any legal combination of
-shaders in the shaders section.  Reusing text between shaders is
-relatively easy by using separate definitions and including them, as
-per above.
-
-To actually compile and use these, call the following; it will attempt
-to compile and link all the specified programs, reporting any errors
-along the way to `*error-output*`:
-
-```lisp
-(compile-shader-dictionary *my-programs*)
-  ;; => DICTIONARY
-```
-
-This **requires** a valid GL context, will only work when it is
-otherwise legal to make GL calls.  As well, the returned
-`SHADER-DICTIONARY` object is only valid in the GL context in which it
-was compiled.  It will **not** work in others.
-
-Once you have this object, you may do interesting things with it:
-
-```lisp
-(sdl2.kit:use-program DICTIONARY :name)
-(sdl2.kit:uniformi DICTIONARY :v1 0)
-(sdl2.kit:uniformf DICTIONARY :v2 x y)
-
-;; etc
-```
-
-Note these are different functions than the `cl-opengl` variety; they
-take the *dictionary* object, as well as symbolic names, rather than
-IDs.
+Shader dictionary support in `sdl2kit` is **deprecated**.  This has
+been moved to (glkit)[https://github.com/lispgames/glkit].

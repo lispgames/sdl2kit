@@ -15,6 +15,10 @@
 (defun sdl-window-id (window)
   (sdl2:get-window-id (sdl-window window)))
 
+(defun window-size (window)
+  (with-slots (sdl-window) window
+    (sdl2:get-window-size sdl-window)))
+
 (defun window-from-id (sdl-window-id)
   (gethash sdl-window-id *all-windows*))
 
