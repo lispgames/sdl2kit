@@ -90,17 +90,9 @@ primarily so it can be easily redefined without starting/stopping."
                                  :poll :wait)
                  as rc = (sdl2:next-event ev method)
                  as idle-p = (and (= 0 rc) (eq :poll method))
-                 do (block sdl-main-loop
-                      (handler-bind ((error (lambda (e)
-                                              (let ((trivial-backtrace:*date-time-format* "%Y/%m/%d %H:%M:%S  "))
-                                               (format *debug-io* "~&SDL2.KIT:MAIN-LOOP:~%")
-                                               (trivial-backtrace:print-backtrace e)
-                                               (return-from sdl-main-loop)))))
-                        ;; Note we do not want to pass the _prior_ event
-                        ;; if we are idle
-                        (main-loop-function (unless idle-p ev) idle-p)))
-                    (when *main-loop-quit*
-                      (return))))
+                 do (handler-case
+                        (main-loop-function (unless idle-p ev) idle-p)
+                      (sdl2:sdl-abort (c) (declare (ignore c))))))
       (setf *main-loop* nil))))
 
 (defun start ()

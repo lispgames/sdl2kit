@@ -4,7 +4,7 @@
   :author "Chip Collier <photex@lofidelitygames.com>, Ryan Pavlik <rpavlik@gmail.com>, Peter Keller <psilord@cs.wisc.edu>"
   :license "MIT"
 
-  :depends-on (:sdl2 :trivial-backtrace)
+  :depends-on (:sdl2)
   :pathname "src"
   :serial t
 
