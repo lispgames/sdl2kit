@@ -37,10 +37,11 @@
 ;;; All of these methods are OPTIONAL.  However, without a render
 ;;; method, your window will not look like much!
 
-(defmethod initialize-instance ((w test-window) &key &allow-other-keys)
-  ;; It is critical you call-next-method first, or you won't get a GL
-  ;; context or window.
-  (call-next-method)
+
+;;; Note this is an :AFTER method.  You should either use :AFTER, or
+;;; you must (CALL-NEXT-METHOD).
+
+(defmethod initialize-instance :after ((w test-window) &key &allow-other-keys)
   ;; GL setup can go here; your GL context is automatically active,
   ;; and this is done in the main thread.
   (gl:viewport 0 0 800 600)
@@ -67,8 +68,9 @@
 
 (defmethod close-window ((window test-window))
   (format t "Bye!~%")
-  ;; You MUST call-next-method.  But do it last, because everything
-  ;; goes away when you do (your window, gl-context, etc)!
+  ;; To _actually_ destroy the GL context and close the window,
+  ;; CALL-NEXT-METHOD.  You _may_ not want to do this, if you wish to
+  ;; prompt the user!
   (call-next-method))
 
 (defmethod mousewheel-event ((window test-window) ts x y)

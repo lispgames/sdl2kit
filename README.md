@@ -29,11 +29,10 @@ primarily specialize on `WINDOW`:
 * `keyboard-event WINDOW STATE TIMESTAMP REPEAT-P KEYSYM`
 * `other-event WINDOW EVENT`: Other events not implemented yet
 * `render WINDOW`
-* `close-window WINDOW`
+* `close-window WINDOW`:  Close the window.  If you add a method to this, the window will not be closed unless you `CALL-NEXT-METHOD`.  This may be useful!
 
-**NOTE:** Certain methods *require* you to `CALL-NEXT-METHOD` to
-function properly.  This includes your window's
-`INITIALIZE-INSTANCE`.  See the example for details.
+**NOTE:** `INITIALIZE-INSTANCE` requires you `CALL-NEXT-METHOD` first,
+or simply define your method as `:AFTER`.  (This is due to method ordering being most-specific-first.)
 
 Of these, you should only call `RENDER` or `CLOSE-WINDOW` from user
 code.  However, these can be called from *any* thread safely.
