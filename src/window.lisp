@@ -131,7 +131,8 @@
 ;;; Protocol
 (defmethod close-window ((window gl-window))
   (with-slots (gl-context) window
-    (sdl2:gl-delete-context gl-context))
+    (when (and (slot-boundp window 'gl-context) gl-context)
+      (sdl2:gl-delete-context gl-context)))
   (call-next-method))
 
 (defmethod render :before ((window gl-window))
