@@ -51,4 +51,4 @@ rendering.
 ## Shaders
 
 Shader dictionary support in `sdl2kit` is **deprecated**.  This has
-been moved to (glkit)[https://github.com/lispgames/glkit].
+been moved to [glkit](https://github.com/lispgames/glkit).
