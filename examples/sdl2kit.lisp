@@ -32,7 +32,9 @@
 (in-package :sdl2.kit.test)
 
 (defclass test-window (gl-window)
-  ((rotation :initform 0.0)))
+  ((rotation :initform 0.0)
+   (start-time :initform (get-internal-real-time))
+   (frames :initform 0)))
 
 ;;; All of these methods are OPTIONAL.  However, without a render
 ;;; method, your window will not look like much!
@@ -44,6 +46,7 @@
 (defmethod initialize-instance :after ((w test-window) &key &allow-other-keys)
   ;; GL setup can go here; your GL context is automatically active,
   ;; and this is done in the main thread.
+  (setf (idle-render w) t)
   (gl:viewport 0 0 800 600)
   (gl:matrix-mode :projection)
   (gl:ortho -2 2 -2 2 -2 2)
@@ -64,7 +67,15 @@
     (gl:vertex 0.0 1.0)
     (gl:vertex -1.0 -1.0)
     (gl:vertex 1.0 -1.0)
-    (gl:end)))
+    (gl:end))
+  (with-slots (start-time frames) window
+    (incf frames)
+    (let* ((current-time (get-internal-real-time))
+           (seconds (/ (- current-time start-time) internal-time-units-per-second)))
+      (when (> seconds 5)
+        (format t "FPS: ~A~%" (float (/ frames seconds)))
+        (setf frames 0)
+        (setf start-time (get-internal-real-time))))))
 
 (defmethod close-window ((window test-window))
   (format t "Bye!~%")
