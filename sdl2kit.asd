@@ -4,7 +4,7 @@
   :author "Chip Collier <photex@lofidelitygames.com>, Ryan Pavlik <rpavlik@gmail.com>, Peter Keller <psilord@cs.wisc.edu>"
   :license "MIT"
 
-  :depends-on (:sdl2)
+  :depends-on (:alexandria :sdl2 :defpackage-plus)
   :pathname "src"
   :serial t
 

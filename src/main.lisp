@@ -6,6 +6,21 @@
 
 (defvar *event* nil)
 
+(define-condition close-window (condition) ())
+
+(defmacro when-window-from-id ((var id-form) &body body)
+  (with-gensyms (block)
+    `(block ,block
+       (when-let ((,var (window-from-id ,id-form)))
+         (handler-bind ((close-window (lambda (&rest r)
+                                        (declare (ignore r))
+                                        (close-window ,var)
+                                        (return-from ,block))))
+           (restart-bind
+               ((close-window (lambda () (signal 'close-window))
+                  :report-function (lambda (s) (format s "Call CLOSE-WINDOW on ~S, continuing" ,var))))
+             ,@body))))))
+
 (defun main-loop-function (ev idle-p)
   "This is called every iteration of the main loop.  It exists
 primarily so it can be easily redefined without starting/stopping."

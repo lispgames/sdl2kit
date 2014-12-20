@@ -2,11 +2,11 @@
 ;;;
 ;;; First, run this.  It is SAFE to run repeatedly:
 ;;;
-;;;   (sdl2.kit:start)
+;;;   (kit.sdl2:start)
 ;;;
 ;;; Then, make a window.
 ;;;
-;;;   (make-instance 'sdl2.kit.test:test-window)
+;;;   (make-instance 'kit.sdl2.test:test-window)
 ;;;
 ;;; You can make multiple windows if you want.  Note that, despite not
 ;;; assigning the value, THIS IS NOT COLLECTED.  A reference is kept
@@ -25,11 +25,7 @@
 ;;; These are the only functions guaranteed to be "safe" (including
 ;;; threadsafety and other expectations).
 
-(defpackage :sdl2.kit.test
-  (:use #:cl #:alexandria #:sdl2.kit)
-  (:export #:test-window))
-
-(in-package :sdl2.kit.test)
+(in-package :kit.sdl2.test)
 
 (defclass test-window (gl-window)
   ((rotation :initform 0.0)
@@ -67,7 +63,9 @@
     (gl:vertex 0.0 1.0)
     (gl:vertex -1.0 -1.0)
     (gl:vertex 1.0 -1.0)
-    (gl:end))
+    (gl:end)))
+
+(defmethod render :after ((window test-window))
   (with-slots (start-time frames) window
     (incf frames)
     (let* ((current-time (get-internal-real-time))
