@@ -92,7 +92,7 @@ primarily so it can be easily redefined without starting/stopping."
                  as idle-p = (and (= 0 rc) (eq :poll method))
                  do (handler-case
                         (main-loop-function (unless idle-p ev) idle-p)
-                      (sdl2:sdl-abort (c) (declare (ignore c))))))
+                      (sdl2:sdl-continue (c) (declare (ignore c))))))
       (setf *main-loop* nil))))
 
 (defun start ()
