@@ -72,10 +72,10 @@
 (defmethod initialize-instance
     ((window window)
      &key (title "SDL2 Window") (x :centered) (y :centered) (w 800) (h 600)
-     (shown t) flags &allow-other-keys)
+     (shown t) resizable flags &allow-other-keys)
   (call-next-method)
-  (when shown
-    (pushnew :shown flags))
+  (when shown (pushnew :shown flags))
+  (when resizable (pushnew :resizable flags))
   (with-slots (sdl-window) window
     (setf sdl-window (sdl2:create-window :title title :x x :y y :w w :h h
                                          :flags flags))
@@ -121,7 +121,7 @@
 (defmethod initialize-instance
     ((window gl-window)
      &key (title "SDL2 Window") (x :centered) (y :centered) (w 800) (h 600)
-     (shown t) (resizable nil) flags &allow-other-keys)
+     (shown t) resizable flags &allow-other-keys)
   (call-next-method window :title title :x x :y y :w w :h h :shown shown
                            :flags `(:opengl ,@(if resizable
                                                   '(:resizable)
