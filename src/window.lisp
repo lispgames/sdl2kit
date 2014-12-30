@@ -72,10 +72,11 @@
 (defmethod initialize-instance
     ((window window)
      &key (title "SDL2 Window") (x :centered) (y :centered) (w 800) (h 600)
-     (shown t) resizable flags &allow-other-keys)
+     (shown t) resizable fullscreen flags &allow-other-keys)
   (call-next-method)
   (when shown (pushnew :shown flags))
   (when resizable (pushnew :resizable flags))
+  (when fullscreen (pushnew :fullscreen flags))
   (with-slots (sdl-window) window
     (setf sdl-window (sdl2:create-window :title title :x x :y y :w w :h h
                                          :flags flags))
@@ -121,12 +122,11 @@
 (defmethod initialize-instance
     ((window gl-window)
      &key (title "SDL2 Window") (x :centered) (y :centered) (w 800) (h 600)
-     (shown t) resizable flags &allow-other-keys)
+     (shown t) fullscreen resizable flags &allow-other-keys)
+  (pushnew :opengl flags)
   (call-next-method window :title title :x x :y y :w w :h h :shown shown
-                           :flags `(:opengl ,@(if resizable
-                                                  '(:resizable)
-                                                  nil)
-                                            ,@flags))
+                           :resizable resizable :fullscreen fullscreen
+                           :flags flags)
   (with-slots (gl-context) window
     (setf gl-context (sdl2:gl-create-context (sdl-window window)))
     (sdl2:gl-make-current (sdl-window window) gl-context)))
