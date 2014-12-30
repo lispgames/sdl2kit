@@ -121,9 +121,12 @@
 (defmethod initialize-instance
     ((window gl-window)
      &key (title "SDL2 Window") (x :centered) (y :centered) (w 800) (h 600)
-     (shown t) &allow-other-keys)
+     (shown t) (resizable nil) flags &allow-other-keys)
   (call-next-method window :title title :x x :y y :w w :h h :shown shown
-                           :flags '(:opengl))
+                           :flags `(:opengl ,@(if resizable
+                                                  '(:resizable)
+                                                  nil)
+                                            ,@flags))
   (with-slots (gl-context) window
     (setf gl-context (sdl2:gl-create-context (sdl-window window)))
     (sdl2:gl-make-current (sdl-window window) gl-context)))
@@ -143,3 +146,7 @@
   (when (autowrap:valid-p (sdl-window window))
     (gl:flush)
     (sdl2:gl-swap-window (sdl-window window))))
+
+(defmethod window-event :before ((window gl-window) type ts d1 d2)
+  (with-slots (gl-context) window
+    (sdl2:gl-make-current (sdl-window window) gl-context)))
