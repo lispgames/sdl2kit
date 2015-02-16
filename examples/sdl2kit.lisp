@@ -66,7 +66,7 @@
 (defmethod close-window ((window simple-window))
   (format t "Bye!~%")
   ;; To _actually_ destroy the GL context and close the window,
-i  ;; CALL-NEXT-METHOD.  You _may_ not want to do this, if you wish to
+  ;; CALL-NEXT-METHOD.  You _may_ not want to do this, if you wish to
   ;; prompt the user!
   (call-next-method))
 

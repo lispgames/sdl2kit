@@ -34,4 +34,4 @@
 
 (defpackage+ :kit.sdl2.test
   (:use #:cl #:alexandria #:kit.sdl2)
-  (:export #:test-window))
+  (:export #:test-window #:simple-window))
