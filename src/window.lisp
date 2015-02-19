@@ -3,6 +3,16 @@
 (defvar *all-windows* (make-hash-table))
 (defvar *idle-render-windows* (make-hash-table))
 
+ ;; Generic Functions
+
+(defgeneric initialize-window (instance &key &allow-other-keys)
+  (:method-combination progn :most-specific-last))
+
+(defgeneric additional-window-flags (instance)
+  (:method-combination append)
+  (:method append (instance)
+    nil))
+
  ;; Base Window Classes
 
 (defclass window ()
@@ -65,21 +75,24 @@
 
 ;;;; WINDOW
 
-(defmethod initialize-instance :around ((window window) &key &allow-other-keys)
+(defmethod initialize-instance :around ((window window) &rest r
+                                        &key &allow-other-keys)
   (sdl2:in-main-thread ()
+    (apply #'initialize-window window r)
     (call-next-method)))
 
-(defmethod initialize-instance
+(defmethod initialize-window progn
     ((window window)
      &key (title "SDL2 Window") (x :centered) (y :centered) (w 800) (h 600)
      (shown t) resizable fullscreen flags &allow-other-keys)
-  (call-next-method)
   (when shown (pushnew :shown flags))
   (when resizable (pushnew :resizable flags))
   (when fullscreen (pushnew :fullscreen flags))
   (with-slots (sdl-window) window
     (setf sdl-window (sdl2:create-window :title title :x x :y y :w w :h h
-                                         :flags flags))
+                                         :flags (append
+                                                 (additional-window-flags window)
+                                                 flags)))
     (setf (gethash (sdl2:get-window-id sdl-window) *all-windows*)
           window)))
 
@@ -119,17 +132,14 @@
 
 ;;;; GL-WINDOW
 
-(defmethod initialize-instance
-    ((window gl-window)
-     &key (title "SDL2 Window") (x :centered) (y :centered) (w 800) (h 600)
-     (shown t) fullscreen resizable flags &allow-other-keys)
-  (pushnew :opengl flags)
-  (call-next-method window :title title :x x :y y :w w :h h :shown shown
-                           :resizable resizable :fullscreen fullscreen
-                           :flags flags)
+(defmethod initialize-window progn
+    ((window gl-window) &key &allow-other-keys)
   (with-slots (gl-context) window
     (setf gl-context (sdl2:gl-create-context (sdl-window window)))
     (sdl2:gl-make-current (sdl-window window) gl-context)))
+
+(defmethod additional-window-flags append ((window gl-window))
+  '(:opengl))
 
 ;;; Protocol
 (defmethod close-window ((window gl-window))
