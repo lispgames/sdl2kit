@@ -78,8 +78,11 @@
 (defmethod initialize-instance :around ((window window) &rest r
                                         &key &allow-other-keys)
   (sdl2:in-main-thread ()
-    (apply #'initialize-window window r)
     (call-next-method)))
+
+(defmethod initialize-instance :before ((window window) &rest r
+                                        &key &allow-other-keys)
+  (apply #'initialize-window window r))
 
 (defmethod initialize-window progn
     ((window window)
