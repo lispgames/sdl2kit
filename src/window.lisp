@@ -88,13 +88,16 @@
   (when shown (pushnew :shown flags))
   (when resizable (pushnew :resizable flags))
   (when fullscreen (pushnew :fullscreen flags))
-  (with-slots (sdl-window) window
-    (setf sdl-window (sdl2:create-window :title title :x x :y y :w w :h h
-                                         :flags (append
-                                                 (additional-window-flags window)
-                                                 flags)))
-    (setf (gethash (sdl2:get-window-id sdl-window) *all-windows*)
-          window)))
+  (flet ((int (x) (if (numberp x) (truncate x) x)))
+    (with-slots (sdl-window) window
+      (setf sdl-window (sdl2:create-window :title title
+                                           :x (int x) :y (int y)
+                                           :w (int w) :h (int h)
+                                           :flags (append
+                                                   (additional-window-flags window)
+                                                   flags)))
+      (setf (gethash (sdl2:get-window-id sdl-window) *all-windows*)
+            window))))
 
 ;;; Protocol
 (defmethod window-event ((window window) type timestamp data1 data2))
