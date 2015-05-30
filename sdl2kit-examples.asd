@@ -17,5 +17,6 @@
 ;; TODO: remove
 (asdf:load-system "sdl2kit-examples")
 
+(sdl2.kit:start)
 (make-instance 'kit.sdl2.test2:test-window)
 
