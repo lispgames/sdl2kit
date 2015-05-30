@@ -29,9 +29,3 @@
 
    #:render #:idle-render #:close-window
    #:other-event))
-
- ;; KIT.SDL2.TEST
-
-(defpackage+ :kit.sdl2.test
-  (:use #:cl #:alexandria #:kit.sdl2)
-  (:export #:test-window #:simple-window))
