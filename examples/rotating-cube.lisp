@@ -1,5 +1,10 @@
 (in-package :kit.sdl2.test2)
 
+;;; This requires your graphics card to support GL 3.3 / GLSL 3.30!
+
+;;; Renders a rotating cube to the screen which can be moved with the mouse by holding
+;;; down the left mouse button. Also you may zoom in and out with the mousewheel.
+
 
 ;;; HOW TO USE:
 ;;;
@@ -27,6 +32,9 @@
   ((start-time :initform (get-internal-real-time))
    (one-frame-time :initform (get-internal-real-time))
    (frames :initform 0)))
+
+
+;;Data:--------------------------------------------------------------------------
 
 (defvar *cube-positions*
   (cffi:foreign-alloc
@@ -81,8 +89,8 @@
 ;;Shader------------------------------------------------------------------------
 
 ;; the returned dictionary with the programs can be used like so:
-;; (1) get the program directly (find-program <compiled-dictionary> <program-name>
-;; (2) or just use it directly (use-program <compiled-dictionary> <program-name>
+;; (1) get the program directly (find-program <compiled-dictionary> <program-name>)
+;; (2) or just use it directly (use-program <compiled-dictionary> <program-name>)
 ;;     also (use-program 0) works
 (defun load-shaders ()
   (defdict shaders (:shader-path
@@ -92,6 +100,7 @@
     ;; source code
     (shader matrix-perspective-v :vertex-shader (:file "transform-and-project.vert"))
     (shader color-pass-through-f :fragment-shader (:file "color-pass-through.frag"))
+    ;; here we compose the shaders into programs, in this case just one ":basic-projection"
     (program :basic-projection (:model-to-clip :perspective-matrix) ;<- UNIFORMS!
 	     (:vertex-shader matrix-perspective-v)
 	     (:fragment-shader color-pass-through-f)))
@@ -104,41 +113,21 @@
 (defun initialize-program ()
   (setf *programs-dict* (load-shaders)))
 
-;; to be understood while reading LOAD-SHADER function
+;; to be understood while reading the LOAD-SHADER function
 ;; example: (uniform :vec :<name-of-uniform> <new-value>)
 (defgeneric uniform (type key value)
   (:method ((type (eql :vec)) key value)
     (uniformfv *programs-dict* key value))
+  
   (:method ((type (eql :vec)) key value)
     (uniformfv *programs-dict* key value))
+  
   (:method ((type (eql :mat)) key value)
     ;; nice, transpose is NIL by default!
     (uniform-matrix *programs-dict* key 4 value NIL)))
 
 
-;;..............................................................................
-
-(defparameter *vao-verts*
-  (make-array 6
-   :element-type 'single-float
-   :initial-contents #(0.0 1.0
-                       -1.0 -1.0
-                       1.0 -1.0)))
-
-(defvao vertex-2d ()
-  (:separate ()
-    (vertex :float 2)))
-
-(defvar *test-vao*)
-
-(defun initialize-gl-vao ()
-  (setf *test-vao*
-  	(make-instance 'vao
-  		       :type 'vertex-2d
-  		       :primitive :triangles
-  		       :vertex-count (/ (length *vao-verts*) 2)))
-  (vao-buffer-vector *test-vao* 0 (* 4 (length *vao-verts*)) *vao-verts*))
-
+;;VAO setup.....................................................................
 
 (defvar *vao* 0)
 
@@ -150,10 +139,9 @@
     ;;VBO
     (gl:bind-buffer :array-buffer vbo)
     ;;VBO - positions
-    ;;to avoid magic numbers (* 24 4 3 2) the gl-array can be used, which
-    ;;is a struct containing field with a pointer to the forein-memory and
-    ;;a field with the size.
-    ;;In this case ommited for the sake of a terse example.
+    ;;to avoid magic numbers (* 24 4 3 2) the gl:gl-array (gl:alloc-gl-array) can be used,
+    ;;which is a struct containing field with a pointer to the forein-memory and a field
+    ;;with the size.  In this case ommited for the sake of a terse example.
     ;; Layout:
     ;; 24 number of vertices/colors
     ;; 4 size of the float data type
@@ -183,31 +171,10 @@
     (gl:bind-vertex-array 0)
     (setf *vao* vao)))
 
-
-
-(defmethod initialize-instance :after ((w test-window) &key &allow-other-keys)
-  ;; GL setup can go here; your GL context is automatically active,
-  ;; and this is done in the main thread.
-
-  ;; if you (setf (idle-render window) t) it'll call RENDER as fast as
-  ;; possible when not processing other events - suitable for games
-  (setf (idle-render w) t)
-  (gl:clear-color 0 0 1 1)
-  (gl:clear :color-buffer-bit)
-  (gl:viewport 0 0 800 600)
-
-  ;; with culling
-  (gl:enable :cull-face)
-  (gl:cull-face :back)
-  (gl:front-face :cw)
-
-  (initialize-program)
-  (initialize-vao)
-  (initialize-gl-vao))
-
+;;utils-------------------------------------------------------------------------
 
 (defun framelimit (window &optional (fps 60))
-  "SDL2:DELAY to get desired FPS."
+  "Issues SDL2:DELAY's to get desired FPS."
   (with-slots (one-frame-time) window
     (let ((elapsed-time (- (get-internal-real-time) one-frame-time))
 	  (time-per-frame (/ 1000.0 fps)))
@@ -227,6 +194,29 @@
 	(setf start-time (get-internal-real-time))))))
 
 
+;;init code---------------------------------------------------------------------
+
+(defmethod initialize-instance :after ((w test-window) &key &allow-other-keys)
+  ;; GL setup can go here; your GL context is automatically active,
+  ;; and this is done in the main thread.
+
+  ;; if you (setf (idle-render window) t) it'll call RENDER as fast as
+  ;; possible when not processing other events - suitable for games
+  (setf (idle-render w) t)
+  (gl:clear-color 0 0 1 1)
+  (gl:clear :color-buffer-bit)
+  (gl:viewport 0 0 800 600)
+
+  ;; with culling
+  (gl:enable :cull-face)
+  (gl:cull-face :back)
+  (gl:front-face :cw)
+
+  (initialize-program)
+  (initialize-vao))
+
+;;Rendering----------------------------------------------------------------------
+
 (defparameter *rotate-x* 1.0)
 (defparameter *rotate-y* 0.0)
 (defparameter *zoom-z* -2.0)
@@ -234,13 +224,14 @@
 (defun draw-cube ()
   (gl:bind-vertex-array *vao*)
   (use-program *programs-dict* :basic-projection)
+  ;; all the neat transformations take place here
   (uniform :mat :model-to-clip
 	   (vector
 	    (sb-cga:matrix*
 	     (sb-cga:translate (vec3 0.0 0.0 *zoom-z*))
 	     (sb-cga:rotate (vec3 *rotate-x* *rotate-y* 0.0))
 	     (sb-cga:rotate (vec3 0.0 (mod (/ (sdl2:get-ticks) 5000.0) (* 2 3.14159)) 0.0)))))
-
+  ;; projection matrix
   (uniform :mat :perspective-matrix
 	   (vector (perspective-matrix (* pi 1/3) 1/1 0.0 1000.0)))  
 
@@ -255,13 +246,11 @@
   (gl:clear :color-buffer)
 
   (draw-cube)
-  ;; TODO: remove, very intersting it knows about what shader is used.. ?
-  (vao-draw *test-vao*)
 
   (display-fps window)
   (framelimit window 60))
 
-
+;;Events------------------------------------------------------------------------
 
 (defmethod close-window ((window test-window))
   (format t "Bye!~%")
@@ -271,6 +260,7 @@
   (call-next-method))
 
 (defmethod mousewheel-event ((window test-window) ts x y)
+  ;; zoom in/out
   (cond ((= y 1) (incf *zoom-z* 0.2))
 	((= y -1) (decf *zoom-z* 0.2)))
   (render window))
