@@ -8,4 +8,4 @@
 
 (defpackage+ :kit.sdl2.test2
   (:use #:cl #:alexandria #:kit.sdl2 #:kit.gl.shader #:kit.math)
-  (:export #:test-window #:simple-window))
+  (:export #:test-window))

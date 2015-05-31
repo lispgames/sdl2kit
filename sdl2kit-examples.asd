@@ -4,7 +4,7 @@
   :author "Chip Collier <photex@lofidelitygames.com>, Ryan Pavlik <rpavlik@gmail.com>, Peter Keller <psilord@cs.wisc.edu>"
   :license "MIT"
 
-  :depends-on (:alexandria :sdl2kit :defpackage-plus :glkit)
+  :depends-on (:alexandria :sdl2kit :defpackage-plus :glkit :mathkit)
   :pathname "examples"
   :serial t
 
