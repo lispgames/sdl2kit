@@ -19,4 +19,3 @@
 
 (sdl2.kit:start)
 (make-instance 'kit.sdl2.test2:test-window)
-

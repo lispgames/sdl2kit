@@ -58,21 +58,22 @@
   (cffi:foreign-alloc
    :unsigned-short
    :initial-contents
-   '(0 1 2
+   '(;; front
+     0 1 2
      2 3 0
-
+     ;; right-side     
      4 5 1  
      1 0 4
-
+     ;; back
      7 6 5
      5 4 7
-
+     ;; left-side
      3 2 6
      6 7 3
-
+     ;; top
      4 0 3
      3 7 4
-
+     ;; bottom
      1 5 6
      6 2 1)))
 
@@ -87,6 +88,8 @@
   (defdict shaders (:shader-path
 		    (merge-pathnames
 		     #p "examples/shaders/" (asdf/system:system-source-directory :sdl2kit-examples)))
+    ;; instead of (:file <path>) you may directly provide the shader as a string containing the
+    ;; source code
     (shader matrix-perspective-v :vertex-shader (:file "transform-and-project.vert"))
     (shader color-pass-through-f :fragment-shader (:file "color-pass-through.frag"))
     (program :basic-projection (:model-to-clip :perspective-matrix) ;<- UNIFORMS!
@@ -115,10 +118,26 @@
 
 ;;..............................................................................
 
+(defparameter *vao-verts*
+  (make-array 6
+   :element-type 'single-float
+   :initial-contents #(0.0 1.0
+                       -1.0 -1.0
+                       1.0 -1.0)))
+
+(defvao vertex-2d ()
+  (:separate ()
+    (vertex :float 2)))
+
+(defvar *test-vao*)
 
 (defun initialize-gl-vao ()
-  ;; TODO: try glkit's vao facility?
-  ())
+  (setf *test-vao*
+  	(make-instance 'vao
+  		       :type 'vertex-2d
+  		       :primitive :triangles
+  		       :vertex-count (/ (length *vao-verts*) 2)))
+  (vao-buffer-vector *test-vao* 0 (* 4 (length *vao-verts*)) *vao-verts*))
 
 
 (defvar *vao* 0)
@@ -132,7 +151,7 @@
     (gl:bind-buffer :array-buffer vbo)
     ;;VBO - positions
     ;;to avoid magic numbers (* 24 4 3 2) the gl-array can be used, which
-    ;;is a struct containing field with a  pointer to the forein-memory and
+    ;;is a struct containing field with a pointer to the forein-memory and
     ;;a field with the size.
     ;;In this case ommited for the sake of a terse example.
     ;; Layout:
@@ -154,7 +173,7 @@
     ;;IBO
     (gl:bind-buffer :element-array-buffer ibo)
     ;; why (* 36 2)?
-    ;; it takes 2 trianges to draw the side of cube, hence to draw a whole cube:
+    ;; it takes 2 triangles to draw the side of cube, hence to draw a whole cube:
     ;; (* 2 6) => 12. Each triangle consists of 3 vertices, hence, (* 3 12) => 36
     ;; and the index buffer's indices first point to the vertices in the vbo,
     ;; supplied by *cube-positions*, and then for each position to the corresponding
@@ -183,7 +202,8 @@
   (gl:front-face :cw)
 
   (initialize-program)
-  (initialize-vao))
+  (initialize-vao)
+  (initialize-gl-vao))
 
 
 (defun framelimit (window &optional (fps 60))
@@ -224,7 +244,7 @@
   (uniform :mat :perspective-matrix
 	   (vector (perspective-matrix (* pi 1/3) 1/1 0.0 1000.0)))  
 
-  (%gl:draw-elements :triangles  (* 36 2) :unsigned-short 0)
+  (%gl:draw-elements :triangles (* 36 2) :unsigned-short 0)
   (gl:bind-vertex-array 0))
 
 
@@ -235,6 +255,8 @@
   (gl:clear :color-buffer)
 
   (draw-cube)
+  ;; TODO: remove, very intersting it knows about what shader is used.. ?
+  (vao-draw *test-vao*)
 
   (display-fps window)
   (framelimit window 60))

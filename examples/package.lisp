@@ -7,5 +7,5 @@
   (:export #:test-window #:simple-window))
 
 (defpackage+ :kit.sdl2.test2
-  (:use #:cl #:alexandria #:kit.sdl2 #:kit.gl.shader #:kit.math)
+  (:use #:cl #:alexandria #:kit.sdl2 #:kit.gl #:kit.gl.vao #:kit.gl.shader #:kit.math)
   (:export #:test-window #:simple-window))
