@@ -1,4 +1,4 @@
-(in-package :kit.sdl2.test2)
+(in-package :kit.sdl2.test)
 
 ;;; This requires your graphics card to support GL 3.3 / GLSL 3.30!
 
@@ -14,7 +14,7 @@
 ;;;
 ;;; Then, make a window.
 ;;;
-;;;   (make-instance 'sdl2.kit.test2:test-window)
+;;;   (make-instance 'sdl2.kit.test:cube-window)
 ;;;
 ;;; After you close a window, it will be collected at some point.
 
@@ -28,7 +28,7 @@
 ;;; threadsafety and other expectations).
 
 
-(defclass test-window (gl-window)
+(defclass cube-window (gl-window)
   ((start-time :initform (get-internal-real-time))
    (one-frame-time :initform (get-internal-real-time))
    (frames :initform 0)))
@@ -69,8 +69,8 @@
    '(;; front
      0 1 2
      2 3 0
-     ;; right-side     
-     4 5 1  
+     ;; right-side
+     4 5 1
      1 0 4
      ;; back
      7 6 5
@@ -94,16 +94,16 @@
 ;;     also (use-program 0) works
 (defun load-shaders ()
   (defdict shaders (:shader-path
-		    (merge-pathnames
-		     #p "examples/shaders/" (asdf/system:system-source-directory :sdl2kit-examples)))
+                    (merge-pathnames
+                     #p "examples/shaders/" (asdf/system:system-source-directory :sdl2kit-examples)))
     ;; instead of (:file <path>) you may directly provide the shader as a string containing the
     ;; source code
     (shader matrix-perspective-v :vertex-shader (:file "transform-and-project.vert"))
     (shader color-pass-through-f :fragment-shader (:file "color-pass-through.frag"))
     ;; here we compose the shaders into programs, in this case just one ":basic-projection"
     (program :basic-projection (:model-to-clip :perspective-matrix) ;<- UNIFORMS!
-	     (:vertex-shader matrix-perspective-v)
-	     (:fragment-shader color-pass-through-f)))
+             (:vertex-shader matrix-perspective-v)
+             (:fragment-shader color-pass-through-f)))
   ;; function may only run when a gl-context exists, as its documentation
   ;; mentions
   (compile-shader-dictionary 'shaders))
@@ -118,10 +118,10 @@
 (defgeneric uniform (type key value)
   (:method ((type (eql :vec)) key value)
     (uniformfv *programs-dict* key value))
-  
+
   (:method ((type (eql :vec)) key value)
     (uniformfv *programs-dict* key value))
-  
+
   (:method ((type (eql :mat)) key value)
     ;; nice, transpose is NIL by default!
     (uniform-matrix *programs-dict* key 4 value NIL)))
@@ -133,8 +133,8 @@
 
 (defun initialize-vao ()
   (let ((vao (first (gl:gen-vertex-arrays 1)))
-	(vbo (first (gl:gen-buffers 1)))
-	(ibo (first (gl:gen-buffers 1))))
+        (vbo (first (gl:gen-buffers 1)))
+        (ibo (first (gl:gen-buffers 1))))
     (gl:bind-vertex-array vao)
     ;;VBO
     (gl:bind-buffer :array-buffer vbo)
@@ -157,7 +157,7 @@
     (%gl:buffer-sub-data :array-buffer (* 24 4 3) (* 24 4 3) *cube-colors*)
     (%gl:enable-vertex-attrib-array 1)
     (%gl:vertex-attrib-pointer 1 3 :float :false 0 0)
-    
+
     ;;IBO
     (gl:bind-buffer :element-array-buffer ibo)
     ;; why (* 36 2)?
@@ -177,9 +177,9 @@
   "Issues SDL2:DELAY's to get desired FPS."
   (with-slots (one-frame-time) window
     (let ((elapsed-time (- (get-internal-real-time) one-frame-time))
-	  (time-per-frame (/ 1000.0 fps)))
+          (time-per-frame (/ 1000.0 fps)))
       (when (< elapsed-time time-per-frame)
-	(sdl2:delay (floor (- time-per-frame elapsed-time))))
+        (sdl2:delay (floor (- time-per-frame elapsed-time))))
       (setf one-frame-time (get-internal-real-time)))))
 
 
@@ -187,16 +187,16 @@
   (with-slots (start-time frames) window
     (incf frames)
     (let* ((current-time (get-internal-real-time))
-	   (seconds (/ (- current-time start-time) internal-time-units-per-second)))
+           (seconds (/ (- current-time start-time) internal-time-units-per-second)))
       (when (> seconds 5)
-	(format t "FPS: ~A~%" (float (/ frames seconds)))
-	(setf frames 0)
-	(setf start-time (get-internal-real-time))))))
+        (format t "FPS: ~A~%" (float (/ frames seconds)))
+        (setf frames 0)
+        (setf start-time (get-internal-real-time))))))
 
 
 ;;init code---------------------------------------------------------------------
 
-(defmethod initialize-instance :after ((w test-window) &key &allow-other-keys)
+(defmethod initialize-instance :after ((w cube-window) &key &allow-other-keys)
   ;; GL setup can go here; your GL context is automatically active,
   ;; and this is done in the main thread.
 
@@ -226,20 +226,20 @@
   (use-program *programs-dict* :basic-projection)
   ;; all the neat transformations take place here
   (uniform :mat :model-to-clip
-	   (vector
-	    (sb-cga:matrix*
-	     (sb-cga:translate (vec3 0.0 0.0 *zoom-z*))
-	     (sb-cga:rotate (vec3 *rotate-x* *rotate-y* 0.0))
-	     (sb-cga:rotate (vec3 0.0 (mod (/ (sdl2:get-ticks) 5000.0) (* 2 3.14159)) 0.0)))))
+           (vector
+            (sb-cga:matrix*
+             (sb-cga:translate (vec3 0.0 0.0 *zoom-z*))
+             (sb-cga:rotate (vec3 *rotate-x* *rotate-y* 0.0))
+             (sb-cga:rotate (vec3 0.0 (mod (/ (sdl2:get-ticks) 5000.0) (* 2 3.14159)) 0.0)))))
   ;; projection matrix
   (uniform :mat :perspective-matrix
-	   (vector (perspective-matrix (* pi 1/3) 1/1 0.0 1000.0)))  
+           (vector (perspective-matrix (* pi 1/3) 1/1 0.0 1000.0)))
 
   (%gl:draw-elements :triangles (* 36 2) :unsigned-short 0)
   (gl:bind-vertex-array 0))
 
 
-(defmethod render ((window test-window))
+(defmethod render ((window cube-window))
   ;; Your GL context is automatically active.  FLUSH and
   ;; SDL2:GL-SWAP-WINDOW are done implicitly by GL-WINDOW  (!!)
   ;; after RENDER.
@@ -252,33 +252,32 @@
 
 ;;Events------------------------------------------------------------------------
 
-(defmethod close-window ((window test-window))
+(defmethod close-window ((window cube-window))
   (format t "Bye!~%")
   ;; To _actually_ destroy the GL context and close the window,
   ;; CALL-NEXT-METHOD.  You _may_ not want to do this, if you wish to
   ;; prompt the user!
   (call-next-method))
 
-(defmethod mousewheel-event ((window test-window) ts x y)
+(defmethod mousewheel-event ((window cube-window) ts x y)
   ;; zoom in/out
   (cond ((= y 1) (incf *zoom-z* 0.2))
-	((= y -1) (decf *zoom-z* 0.2)))
+        ((= y -1) (decf *zoom-z* 0.2)))
   (render window))
 
 
-(defmethod keyboard-event ((window test-window) state ts repeat-p keysym)
+(defmethod keyboard-event ((window cube-window) state ts repeat-p keysym)
   (let ((scancode (sdl2:scancode keysym)))
     (when (eq :scancode-escape scancode)
       (close-window window))))
 
-(defmethod mousebutton-event ((window test-window) state ts b x y)
+(defmethod mousebutton-event ((window cube-window) state ts b x y)
   (format t "~A button: ~A at ~A, ~A~%" state b x y))
 
-(defmethod mousemotion-event ((window test-window) ts mask x y xr yr)
+(defmethod mousemotion-event ((window cube-window) ts mask x y xr yr)
   (flet ((left-mouse-button-clicked-p ()
-	   (= mask 1)))
+           (= mask 1)))
     ;; rotate x, y axis
     (when (left-mouse-button-clicked-p)
       (incf *rotate-y* (/ xr 100.0))
       (incf *rotate-x* (/ yr 100.0)))))
-
