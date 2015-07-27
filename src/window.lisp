@@ -77,6 +77,7 @@
 
 (defmethod initialize-instance :around ((window window) &rest r
                                         &key &allow-other-keys)
+  (declare (ignore r))
   (sdl2:in-main-thread ()
     (call-next-method)))
 

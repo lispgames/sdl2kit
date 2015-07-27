@@ -28,4 +28,9 @@
    #:textinput-event
 
    #:render #:idle-render #:close-window
-   #:other-event))
+   #:other-event
+
+   ;; keyboard
+   #:keystate-tracker
+   #:key-down-p #:keystate #:keystate-update
+   ))
