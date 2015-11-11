@@ -8,6 +8,12 @@
 
 (define-condition close-window (condition) ())
 
+(defmacro for-all-windows ((w) &body b)
+  (with-gensyms (k)
+    `(loop for ,k being each hash-key in *all-windows*
+           as ,w = (gethash ,k *all-windows*)
+           do (progn ,@b))))
+
 (defmacro when-window-from-id ((var id-form) &body body)
   (with-gensyms (block)
     `(block ,block
@@ -34,6 +40,27 @@ primarily so it can be easily redefined without starting/stopping."
                do (render (gethash id *all-windows*))))
         ((eq :lisp-message type)
          (sdl2::get-and-handle-messages))
+        ((eq :controlleraxismotion type)
+         (let ((window (window-from-id *focused-window-id*)))
+           (when window
+             (controller-axis-motion-event
+              window
+              (gethash (event :cbutton :which)
+                       *id-to-controller*)
+              (event :caxis :timestamp)
+              (event :caxis :axis)
+              (event :caxis :value)))))
+        ((or (eq :controllerbuttondown type)
+             (eq :controllerbuttonup type))
+         (let ((window (window-from-id *focused-window-id*)))
+           (when window
+             (controller-button-event
+              window
+              (gethash (event :cbutton :which)
+                       *id-to-controller*)
+              type
+              (event :cbutton :timestamp)
+              (event :cbutton :button)))))
         ((or (eq :mousebuttondown type)
              (eq :mousebuttonup type))
          (let ((window (window-from-id (event :button :window-id))))
@@ -91,6 +118,20 @@ primarily so it can be easily redefined without starting/stopping."
                            (event :window :timestamp)
                            (event :window :data1)
                            (event :window :data2)))))
+        ((eq :controllerdeviceadded type)
+         (let* ((id (event :cdevice :which))
+                (c (sdl2:game-controller-open id))
+                (instance-id (sdl2:game-controller-instance-id c)))
+           (setf (gethash instance-id *id-to-controller*) c)
+           (for-all-windows (w)
+             (controller-added-event w c))))
+        ((eq :controllerdeviceremoved type)
+         (let* ((instance-id (event :cdevice :which))
+                (c (gethash instance-id *id-to-controller*)))
+           (for-all-windows (w)
+             (controller-removed-event w c))
+           (sdl2:game-controller-close c)
+           (remhash instance-id *id-to-controller*)))
         (t
          (let ((focused-window (gethash *focused-window-id* *all-windows*)))
            (when focused-window

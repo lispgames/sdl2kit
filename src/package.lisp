@@ -26,6 +26,10 @@
    #:mousebutton-event
    #:mousewheel-event
    #:textinput-event
+   #:controller-added-event
+   #:controller-removed-event
+   #:controller-axis-motion-event
+   #:controller-button-event
 
    #:render #:idle-render #:close-window
    #:other-event

@@ -90,4 +90,18 @@
   (when (> mask 0)
     (format t "Mouse motion, button-mask = ~A at ~A, ~A~%" mask x y)))
 
+(defmethod controller-added-event ((window simple-window) c)
+  (format t "Added ~A (id=~A)~%" c (sdl2:game-controller-instance-id c)))
+
+(defmethod controller-removed-event ((window simple-window) c)
+  (format t "Removed ~A (id=~A)~%" c (sdl2:game-controller-instance-id c)))
+
+(defmethod controller-axis-motion-event ((window simple-window) c ts axis value)
+  (format t "ID ~A, Axis ~A, Value ~A~%"
+          (sdl2:game-controller-instance-id c) axis value))
+
+(defmethod controller-button-event ((window simple-window) c state ts button)
+  (format t "ID ~A, Button ~A, State ~S~%"
+          (sdl2:game-controller-instance-id c) button state))
+
 ;; (make-instance 'simple-window)

@@ -2,6 +2,7 @@
 
 (defvar *all-windows* (make-hash-table))
 (defvar *idle-render-windows* (make-hash-table))
+(defvar *id-to-controller* (make-hash-table))
 
  ;; Generic Functions
 
@@ -48,6 +49,11 @@
 (defgeneric textinput-event (window timestamp text))
 (defgeneric keyboard-event (window state timestamp repeat-p keysym))
 
+(defgeneric controller-added-event (window c))
+(defgeneric controller-removed-event (window c))
+(defgeneric controller-axis-motion-event (window controller timestamp axis value))
+(defgeneric controller-button-event (window controller state timestamp button))
+
 (defgeneric render (window)
   (:documentation "Render the contents of WINDOW."))
 
@@ -78,8 +84,12 @@
 (defmethod initialize-instance :around ((window window) &rest r
                                         &key &allow-other-keys)
   (declare (ignore r))
+  (kit.sdl2:start)
   (sdl2:in-main-thread ()
-    (call-next-method)))
+    (call-next-method)
+    (loop for k being each hash-key in *id-to-controller*
+          as c = (gethash k *id-to-controller*)
+          do (controller-added-event window c))))
 
 (defmethod initialize-instance :before ((window window) &rest r
                                         &key &allow-other-keys)
@@ -117,6 +127,11 @@
 (defmethod mousewheel-event ((window window) timestamp x y))
 (defmethod textinput-event ((window window) timestamp text))
 (defmethod keyboard-event ((window window) state timestamp repeat-p keysym))
+
+(defmethod controller-added-event ((window window) c))
+(defmethod controller-removed-event ((window window) c))
+(defmethod controller-axis-motion-event ((window window) c ts axis value))
+(defmethod controller-button-event ((window window) c state ts button))
 
 (defmethod render :around ((window window))
   (sdl2:in-main-thread () (call-next-method)))
