@@ -11,7 +11,6 @@
   :components
   ((:file "package")
    (:file "window")
-   (:file "shaders")
    (:file "keyboard")
    (:file "main")))
 
