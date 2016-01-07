@@ -64,8 +64,3 @@ To re-enable or check the status of rendering, use the following:
 Note that this only prevents *rendering*; events and other callbacks
 will still be active.  This makes it easy to close a window if desired
 before fixing the issue.
-
-## Shaders
-
-Shader dictionary support in `sdl2kit` is **deprecated**.  This has
-been moved to [glkit](https://github.com/lispgames/glkit).
