@@ -48,6 +48,23 @@ following to enable idle rendering:
 You may do this at any time, and also set it to `NIL` to disable idle
 rendering.
 
+## Render Disable
+
+When an unhandled error happens in `RENDER`, this could lead to
+unpleasant effects: often a long string of errors until the window is
+close, or the error is fixed, especially if `IDLE-RENDER` is enabled.
+
+However, sdl2kit will automatically *disable* window rendering if such
+an error occurs.  This will prevent further errors from occurring.
+To re-enable or check the status of rendering, use the following:
+
+* `(render-enabled WINDOW)`: Return the status of rendering
+* `(setf (render-enabled WINDOW) BOOLEAN)`: Set the state of window rendering
+
+Note that this only prevents *rendering*; events and other callbacks
+will still be active.  This makes it easy to close a window if desired
+before fixing the issue.
+
 ## Shaders
 
 Shader dictionary support in `sdl2kit` is **deprecated**.  This has

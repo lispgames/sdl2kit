@@ -15,6 +15,7 @@
    #:window #:gl-window
 
    #:sdl-window #:sdl-window-id #:gl-context #:window-from-id
+   #:render-enabled
 
    #:all-windows
 

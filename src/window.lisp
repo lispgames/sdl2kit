@@ -17,7 +17,8 @@
  ;; Base Window Classes
 
 (defclass window ()
-  ((sdl-window :initform nil :reader sdl-window)))
+  ((sdl-window :initform nil :reader sdl-window)
+   (render-enabled :initform t :accessor render-enabled)))
 
 (defclass gl-window (window)
   ((gl-context :initform nil :reader gl-context)))
@@ -134,7 +135,13 @@
 (defmethod controller-button-event ((window window) c state ts button))
 
 (defmethod render :around ((window window))
-  (sdl2:in-main-thread () (call-next-method)))
+  (when (render-enabled window)
+    (sdl2:in-main-thread ()
+      (handler-bind ((error
+                       (lambda (e)
+                         (setf (render-enabled window) nil)
+                         (error e))))
+        (call-next-method)))))
 
 (defmethod render (window))
 
