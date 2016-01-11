@@ -102,7 +102,10 @@
      (shown t) resizable fullscreen flags &allow-other-keys)
   (when shown (pushnew :shown flags))
   (when resizable (pushnew :resizable flags))
-  (when fullscreen (pushnew :fullscreen flags))
+  (case fullscreen
+    ((:windowed :desktop)
+     (pushnew :fullscreen-desktop flags))
+    (t (pushnew :fullscreen flags)))
   (flet ((int (x) (if (numberp x) (truncate x) x)))
     (with-slots (sdl-window) window
       (setf sdl-window (sdl2:create-window :title title
