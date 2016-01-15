@@ -103,6 +103,7 @@
   (when shown (pushnew :shown flags))
   (when resizable (pushnew :resizable flags))
   (case fullscreen
+    ((nil))
     ((:windowed :desktop)
      (pushnew :fullscreen-desktop flags))
     (t (pushnew :fullscreen flags)))
