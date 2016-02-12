@@ -153,8 +153,10 @@ primarily so it can be easily redefined without starting/stopping."
 (defun start (&optional function)
   (unless *started*
     (setf *started* t)
-    (unless (sdl2:was-init :everything)
-      (sdl2:init :everything))
+    (handler-case
+        (unless (sdl2:was-init :everything)
+          (sdl2:init :everything))
+      (error () (setf *started* nil)))
     (sdl2:in-main-thread (:background t :no-event t)
       (unwind-protect
            (progn
