@@ -1,6 +1,6 @@
 (in-package :sdl2.kit)
 
-(defvar *main-loop* nil)
+(defvar *started* nil)
 (defvar *main-loop-quit* nil)
 (defvar *focused-window-id* nil)
 
@@ -138,25 +138,37 @@ primarily so it can be easily redefined without starting/stopping."
              (other-event focused-window ev))))))))
 
 (defun main-loop ()
-  (setf *main-loop* t)
   (let (*main-loop-quit*)
-    (unwind-protect
-         (sdl2:with-sdl-event (ev)
-           (loop as method = (if (> (hash-table-count *idle-render-windows*) 0)
-                                 :poll :wait)
-                 as rc = (sdl2:next-event ev method)
-                 as idle-p = (and (= 0 rc) (eq :poll method))
-                 do (handler-case
-                        (main-loop-function (unless idle-p ev) idle-p)
-                      (sdl2:sdl-continue (c) (declare (ignore c))))))
-      (setf *main-loop* nil))))
+    (sdl2:with-sdl-event (ev)
+      (loop as method = (if (> (hash-table-count *idle-render-windows*) 0)
+                            :poll :wait)
+            as rc = (sdl2:next-event ev method)
+            as idle-p = (and (= 0 rc) (eq :poll method))
+            do (handler-case
+                   (if *main-loop-quit*
+                       (return-from main-loop)
+                       (main-loop-function (unless idle-p ev) idle-p))
+                 (sdl2:sdl-continue (c) (declare (ignore c))))))))
 
-(defun start ()
-  (unless *main-loop*
-    (sdl2:init :everything)
+(defun start (&optional function)
+  (unless *started*
+    (setf *started* t)
+    (unless (sdl2:was-init :everything)
+      (sdl2:init :everything))
     (sdl2:in-main-thread (:background t :no-event t)
-      (main-loop)
-      (sdl2-ffi.functions:sdl-quit))))
+      (unwind-protect
+           (progn
+             (when function (funcall function))
+             (main-loop)
+             (sdl2:quit))
+        (setf *started* nil)))))
+
+(defmacro with-start ((&key this-thread-p) &body body)
+  (if this-thread-p
+      `(sdl2:make-this-thread-main
+        (lambda ()
+          (kit.sdl2:start (lambda () ,@body))))
+      `(kit.sdl2:start (lambda () ,@body))))
 
 (defun quit ()
   (sdl2:in-main-thread ()
