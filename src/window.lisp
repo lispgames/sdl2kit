@@ -40,6 +40,22 @@ a cons, e.g. `(10 . 10)`."
        (sdl2:set-window-size sdl-window (aref v 0) (aref v 1)))
       (list (sdl2:set-window-size sdl-window (car v) (cdr v))))))
 
+(defun window-width (win)
+  (multiple-value-bind (w h) (window-size win)
+    (declare (ignore h))
+    w))
+
+(defun window-height (win)
+  (multiple-value-bind (w h) (window-size win)
+    (declare (ignore w))
+    h))
+
+(defun (setf window-width) (v window)
+  (setf (window-size window) (cons v (window-height window))))
+
+(defun (setf window-height) (v window)
+  (setf (window-size window) (cons (window-width window) v)))
+
 (defun window-position (window)
   (with-slots (sdl-window) window
     (sdl2:get-window-position window)))

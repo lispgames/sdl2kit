@@ -17,9 +17,9 @@
    #:sdl-window #:sdl-window-id #:gl-context #:window-from-id
    #:render-enabled
 
-   #:all-windows
+   #:all-windows #:focused-window #:last-window
 
-   #:window-size #:window-position
+   #:window-size #:window-position #:window-width #:window-height
 
    #:window-event
    #:keyboard-event

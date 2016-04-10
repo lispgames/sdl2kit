@@ -3,6 +3,7 @@
 (defvar *started* nil)
 (defvar *main-loop-quit* nil)
 (defvar *focused-window-id* nil)
+(defvar *last-window-id* nil)
 
 (defvar *event* nil)
 
@@ -27,6 +28,9 @@
                   :report-function (lambda (s) (format s "Call CLOSE-WINDOW on ~S, continuing" ,var))))
              ,@body))))))
 
+(defun focused-window () (window-from-id *focused-window-id*))
+(defun last-window () (window-from-id *last-window-id*))
+
 (defun main-loop-function (ev idle-p)
   "This is called every iteration of the main loop.  It exists
 primarily so it can be easily redefined without starting/stopping."
@@ -41,7 +45,7 @@ primarily so it can be easily redefined without starting/stopping."
         ((eq :lisp-message type)
          (sdl2::get-and-handle-messages))
         ((eq :controlleraxismotion type)
-         (let ((window (window-from-id *focused-window-id*)))
+         (let ((window (focused-window)))
            (when window
              (controller-axis-motion-event
               window
@@ -52,7 +56,7 @@ primarily so it can be easily redefined without starting/stopping."
               (event :caxis :value)))))
         ((or (eq :controllerbuttondown type)
              (eq :controllerbuttonup type))
-         (let ((window (window-from-id *focused-window-id*)))
+         (let ((window (focused-window)))
            (when window
              (controller-button-event
               window
@@ -111,7 +115,9 @@ primarily so it can be easily redefined without starting/stopping."
                                     (event :window :event))))
            (when window
              (case window-event-type
-               (:focus-gained (setf *focused-window-id* (event :window :window-id)))
+               (:focus-gained
+                (setf *focused-window-id* (event :window :window-id))
+                (setf *last-window-id* *focused-window-id*))
                (:focus-lost (setf *focused-window-id* nil)))
              (window-event window
                            window-event-type
@@ -133,9 +139,9 @@ primarily so it can be easily redefined without starting/stopping."
            (sdl2:game-controller-close c)
            (remhash instance-id *id-to-controller*)))
         (t
-         (let ((focused-window (gethash *focused-window-id* *all-windows*)))
-           (when focused-window
-             (other-event focused-window ev))))))))
+         (let ((window (focused-window)))
+           (when window
+             (other-event window ev))))))))
 
 (defun main-loop ()
   (let (*main-loop-quit*)
