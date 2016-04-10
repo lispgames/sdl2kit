@@ -12,7 +12,7 @@
    #:start #:quit #:with-start
 
    ;; window
-   #:window #:gl-window
+   #:window #:gl-window #:initialize-window
 
    #:sdl-window #:sdl-window-id #:gl-context #:window-from-id
    #:render-enabled
