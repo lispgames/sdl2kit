@@ -31,6 +31,28 @@
   (with-slots (sdl-window) window
     (sdl2:get-window-size sdl-window)))
 
+(defun (setf window-size) (v window)
+  "Set the size of window `WINDOW` using either a vector, e.g. `#(10 10)`, or
+a cons, e.g. `(10 . 10)`."
+  (with-slots (sdl-window) window
+    (ctypecase v
+      ((simple-vector 2)
+       (sdl2:set-window-size sdl-window (aref v 0) (aref v 1)))
+      (list (sdl2:set-window-size sdl-window (car v) (cdr v))))))
+
+(defun window-position (window)
+  (with-slots (sdl-window) window
+    (sdl2:get-window-position window)))
+
+(defun (setf window-position) (v window)
+  "Set the position of window `WINDOW` using either a vector, e.g. `#(10 10)`, or
+a cons, e.g. `(10 . 10)`."
+  (with-slots (sdl-window) window
+    (ctypecase v
+      ((simple-vector 2)
+       (sdl2:set-window-position sdl-window (aref v 0) (aref v 1)))
+      (cons (sdl2:set-window-position sdl-window (car v) (cdr v))))))
+
 (defun window-from-id (sdl-window-id)
   (gethash sdl-window-id *all-windows*))
 

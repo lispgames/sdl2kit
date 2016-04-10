@@ -19,7 +19,7 @@
 
    #:all-windows
 
-   #:window-size
+   #:window-size #:window-position
 
    #:window-event
    #:keyboard-event
