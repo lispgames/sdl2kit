@@ -168,8 +168,7 @@ primarily so it can be easily redefined without starting/stopping."
       (unwind-protect
            (progn
              (when function (funcall function))
-             (main-loop)
-             (sdl2:quit))
+             (main-loop))
         (setf *started* nil)))))
 
 (defmacro with-start ((&key this-thread-p) &body body)
