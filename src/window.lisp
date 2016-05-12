@@ -123,7 +123,6 @@ a cons, e.g. `(10 . 10)`."
 (defmethod initialize-instance :around ((window window) &rest r
                                         &key &allow-other-keys)
   (declare (ignore r))
-  (kit.sdl2:start)
   (sdl2:in-main-thread ()
     (call-next-method)
     (loop for k being each hash-key in *id-to-controller*
