@@ -9,7 +9,7 @@
    #:*event*
 
    ;; main-loop
-   #:start #:quit #:with-start
+   #:init #:start #:quit #:with-start
 
    ;; window
    #:window #:gl-window #:initialize-window

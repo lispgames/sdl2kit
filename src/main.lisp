@@ -157,19 +157,23 @@ primarily so it can be easily redefined without starting/stopping."
                        (return-from main-loop)))
                  (sdl2:sdl-continue (c) (declare (ignore c))))))))
 
+(defun init ()
+  (handler-case
+      (unless (sdl2:was-init :everything)
+        (sdl2:init :everything))
+    (error () (setf *started* nil))))
+
 (defun start (&optional function)
   (unless *started*
     (setf *started* t)
-    (handler-case
-        (unless (sdl2:was-init :everything)
-          (sdl2:init :everything))
-      (error () (setf *started* nil)))
-    (sdl2:in-main-thread (:background t :no-event t)
-      (unwind-protect
-           (progn
-             (when function (funcall function))
-             (main-loop))
-        (setf *started* nil)))))
+    (init)
+    (when *started*
+      (sdl2:in-main-thread (:background t :no-event t)
+        (unwind-protect
+             (progn
+               (when function (funcall function))
+               (main-loop))
+          (setf *started* nil))))))
 
 (defmacro with-start ((&key this-thread-p) &body body)
   (if this-thread-p
