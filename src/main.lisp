@@ -151,9 +151,10 @@ primarily so it can be easily redefined without starting/stopping."
             as rc = (sdl2:next-event ev method)
             as idle-p = (and (= 0 rc) (eq :poll method))
             do (handler-case
-                   (if *main-loop-quit*
-                       (return-from main-loop)
-                       (main-loop-function (unless idle-p ev) idle-p))
+                   (progn
+                     (main-loop-function (unless idle-p ev) idle-p)
+                     (when *main-loop-quit*
+                       (return-from main-loop)))
                  (sdl2:sdl-continue (c) (declare (ignore c))))))))
 
 (defun start (&optional function)
@@ -180,4 +181,5 @@ primarily so it can be easily redefined without starting/stopping."
 
 (defun quit ()
   (sdl2:in-main-thread ()
-    (setf *main-loop-quit* t)))
+    (setf *main-loop-quit* t))
+  (sdl2:quit))
