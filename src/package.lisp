@@ -3,13 +3,14 @@
 (defpackage+ :kit.sdl2
   (:use #:cl #:alexandria)
   (:nicknames #:sdl2.kit) ; deprecated
-  (:export
+  (:export-only
 
    ;; general
    #:*event*
 
    ;; main-loop
    #:init #:start #:quit #:with-start
+   #:define-start-function
 
    ;; window
    #:window #:gl-window #:initialize-window

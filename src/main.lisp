@@ -186,3 +186,10 @@ primarily so it can be easily redefined without starting/stopping."
   (sdl2:in-main-thread ()
     (setf *main-loop-quit* t))
   (sdl2:quit))
+
+(defmacro define-start-function (name lambda-list &body body)
+  `(defun ,name ,lambda-list
+     (kit.sdl2:init)
+     (sdl2:in-main-thread ()
+       ,@body)
+     (kit.sdl2:start)))
