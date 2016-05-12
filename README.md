@@ -12,6 +12,7 @@ At the moment, this includes the following functionality:
 * Managing the "shader dictionary": compiling shaders, linking
   programs, outputting errors, activating programs, and setting
   uniforms by name.
+* Integrating with binary generation for easy startup/exit
 
 For an example, see `examples/sdl2kit.lisp`.
 
@@ -64,3 +65,54 @@ To re-enable or check the status of rendering, use the following:
 Note that this only prevents *rendering*; events and other callbacks
 will still be active.  This makes it easy to close a window if desired
 before fixing the issue.
+
+## Startup Functions and Making Binaries
+
+While you can call `(kit.sdl2:start)` and `(make-instance 'my-window)`
+manually, you should define a *startup function*.  This will ease a
+number of things:
+
+```lisp
+(define-start-function run-my-game (&key (w 1280) (h 720))
+  (sdl2:gl-set-attr :context-major-version 3)
+  (sdl2:gl-set-attr :context-minor-version 3)
+  (sdl2:gl-set-attr :context-profile-mask 1)
+  (sdl2:gl-set-attr :stencil-size 8)
+  (make-instance 'game-window :w w :h h))
+```
+
+This wraps the function in `SDL2:IN-MAIN-THREAD`, as well as pre- and
+post-initialization.
+
+This is convenient, but it's even more important for making binaries.
+When you dump a lisp image, this makes sure the initialization and
+startup of cl-sdl2 and sdl2kit are in the right order.
+
+Typically when you dump a binary, you define a "toplevel function" to
+be called.  It should look something like this:
+
+```lisp
+(save-my-lisp
+ :toplevel-function
+ (lambda () (sdl2:make-this-thread-main 'run-my-game)))
+ ```
+
+This will prevent additional threads from being created (unless your
+game makes them itself), and everything should run and exit seamlessly
+(but see below).  `(RUN-MY-GAME)` should also work normally in Sly or
+SLIME.
+
+## Exiting
+
+Quitting sdl2kit can by done with `(kit.sdl2:quit)`.  This also quits
+`cl-sdl2`, calling `(sdl2:quit)`.  Normally, you should not need to do
+this during development, or if you're running things in Sly or SLIME.
+However, if you're making a binary, you probably want your game to
+exit!  In this case, calling `(kit.sdl2:quit)` during `CLOSE-WINDOW`
+or some other event should be sufficient to exit, if you're using a
+startup function as above.
+
+Build integration is coming soon, so it's easy to tell whether you're
+running "as a binary" or not.  Currently to do this, you will need to
+set some flag yourself during the build process, which is also
+available during normal runs.
