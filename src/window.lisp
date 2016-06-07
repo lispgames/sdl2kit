@@ -69,6 +69,15 @@ a cons, e.g. `(10 . 10)`."
        (sdl2:set-window-position sdl-window (aref v 0) (aref v 1)))
       (cons (sdl2:set-window-position sdl-window (car v) (cdr v))))))
 
+(defun window-title (window)
+  (with-slots (sdl-window) window
+    (sdl2:get-window-title sdl-window)))
+
+(defun (setf window-title) (v window)
+  (with-slots (sdl-window) window
+    (sdl2:set-window-title sdl-window v)
+    v))
+
 (defun window-from-id (sdl-window-id)
   (gethash sdl-window-id *all-windows*))
 

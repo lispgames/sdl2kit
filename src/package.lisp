@@ -21,6 +21,7 @@
    #:all-windows #:focused-window #:last-window
 
    #:window-size #:window-position #:window-width #:window-height
+   #:window-title
 
    #:window-event
    #:keyboard-event
