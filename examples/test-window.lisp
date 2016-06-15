@@ -20,7 +20,7 @@
                  (plusp fps))
         (format t "Framerate: ~,3f fps, ~,3f ms/frame~%" fps (/ 1000 fps))
         (setf frames 0
-              start-time current-time))))))
+              start-time current-time)))))
 
 (defmethod textinput-event :after ((window test-window) ts text)
   (when (string= "Q" (string-upcase text))
