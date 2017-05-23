@@ -2,6 +2,7 @@
 
 (defpackage+ :kit.sdl2
   (:use #:cl #:alexandria)
+  (:nicknames #:sdl2.kit)
   (:export-only
 
    ;; general
