@@ -157,16 +157,16 @@ primarily so it can be easily redefined without starting/stopping."
                        (return-from main-loop)))
                  (sdl2:sdl-continue (c) (declare (ignore c))))))))
 
-(defun init ()
+(defun init (&optional (init-flags '(:everything)))
   (handler-case
-      (unless (sdl2:was-init :everything)
-        (sdl2:init :everything))
+      (unless (apply #'sdl2:was-init init-flags)
+        (apply #'sdl2:init init-flags))
     (error () (setf *started* nil))))
 
-(defun start (&optional function)
+(defun start (&optional function (init-flags '(:everything)))
   (unless *started*
     (setf *started* t)
-    (init)
+    (init init-flags)
     (when *started*
       (sdl2:in-main-thread (:background t :no-event t)
         (unwind-protect
