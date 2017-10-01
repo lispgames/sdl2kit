@@ -102,6 +102,8 @@ game makes them itself), and everything should run and exit seamlessly
 (but see below).  `(RUN-MY-GAME)` should also work normally in Sly or
 SLIME.
 
+## Implementation specifics
+
 It's worth noting that in some lisp implementations, all SDL and OpenGL 
 calls must be made from the main thread. The `examples/rotating-cube.lisp`
 can be run as follows:
