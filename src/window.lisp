@@ -58,7 +58,7 @@ a cons, e.g. `(10 . 10)`."
 
 (defun window-position (window)
   (with-slots (sdl-window) window
-    (sdl2:get-window-position window)))
+    (sdl2:get-window-position sdl-window)))
 
 (defun (setf window-position) (v window)
   "Set the position of window `WINDOW` using either a vector, e.g. `#(10 10)`, or
