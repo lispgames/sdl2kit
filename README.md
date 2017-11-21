@@ -9,9 +9,6 @@ At the moment, this includes the following functionality:
 * A generalized event loop
 * Managing multiple windows
 * Managing the rendering loop, including GL
-* Managing the "shader dictionary": compiling shaders, linking
-  programs, outputting errors, activating programs, and setting
-  uniforms by name.
 * Integrating with binary generation for easy startup/exit
 
 For an example, see `examples/sdl2kit.lisp`.
