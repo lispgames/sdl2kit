@@ -102,6 +102,25 @@ game makes them itself), and everything should run and exit seamlessly
 (but see below).  `(RUN-MY-GAME)` should also work normally in Sly or
 SLIME.
 
+## Implementation specifics
+
+It's worth noting that in some lisp implementations, all SDL and OpenGL 
+calls must be made from the main thread. The `examples/rotating-cube.lisp`
+can be run as follows:
+
+```lisp
+(ql:quickload :sdl2kit-examples)
+
+(sdl2.kit:define-start-function cube-test (&key (w 800) (h 500))
+  (sdl2:gl-set-attr :stencil-size 8)
+  (sdl2:gl-set-attr :context-profile-mask 1)
+  (sdl2:gl-set-attr :context-major-version 3)
+  (sdl2:gl-set-attr :context-minor-version 3)
+  (make-instance 'kit.sdl2.test:cube-window :w w :h h))
+
+(sdl2:make-this-thread-main #'cube-test)
+```
+
 ## Exiting
 
 Quitting sdl2kit can by done with `(kit.sdl2:quit)`.  This also quits
